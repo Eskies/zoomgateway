@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"log"
 	"time"
+	"zoomgateway/controller"
 	"zoomgateway/localtools"
 
 	"github.com/dgrijalva/jwt-go"
@@ -65,11 +66,11 @@ func main() {
 	r.PanicHandler = panicrouteHandler
 
 	r.GET("/", func(ctx *fasthttp.RequestCtx) {
-		IndexController(dbConn, ctx, pagesettings, zoomsettings)
+		controller.IndexController(dbConn, ctx, pagesettings, zoomsettings, &jwtkey, poolcache)
 	})
 
 	r.POST("/login", func(ctx *fasthttp.RequestCtx) {
-		LoginController(dbConn, ctx, pagesettings, zoomsettings)
+		controller.LoginController(dbConn, ctx, pagesettings, zoomsettings, &jwtkey, poolcache)
 	})
 
 	r.GET("/logout", func(ctx *fasthttp.RequestCtx) {
@@ -94,15 +95,15 @@ func main() {
 	})
 
 	r.GET("/seminar", apiAuth(func(ctx *fasthttp.RequestCtx) {
-		SeminarPageController(dbConn, ctx, pagesettings, zoomsettings)
+		controller.SeminarPageController(dbConn, ctx, pagesettings, zoomsettings)
 	}))
 
 	r.GET("/joinseminar/{idsesi}", apiAuth(func(ctx *fasthttp.RequestCtx) {
-		JoinSeminarController(dbConn, ctx, pagesettings, zoomsettings)
+		controller.JoinSeminarController(dbConn, ctx, pagesettings, zoomsettings)
 	}))
 
 	r.GET("/tokenseminar/{idsesi}", apiAuth(func(ctx *fasthttp.RequestCtx) {
-		TokenSeminarController(dbConn, ctx, pagesettings, zoomsettings)
+		controller.TokenSeminarController(dbConn, ctx, pagesettings, zoomsettings)
 	}))
 
 	r.GET("/retoken", apiAuth(func(ctx *fasthttp.RequestCtx) {

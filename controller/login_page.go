@@ -1,4 +1,4 @@
-package main
+package controller
 
 import (
 	"crypto/sha1"
@@ -15,7 +15,7 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
-func LoginController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesettings map[string]interface{}, zoomsettings map[string]interface{}) {
+func LoginController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesettings map[string]interface{}, zoomsettings map[string]interface{}, jwtkey *[]byte, poolcache *cache.Cache) {
 
 	nim := string(ctx.FormValue("username"))
 

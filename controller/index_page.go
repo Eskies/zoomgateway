@@ -1,14 +1,16 @@
-package main
+package controller
 
 import (
 	"database/sql"
 	"strings"
 
+	"github.com/patrickmn/go-cache"
+
 	"github.com/dgrijalva/jwt-go"
 	"github.com/valyala/fasthttp"
 )
 
-func IndexController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesettings map[string]interface{}, zoomsettings map[string]interface{}) {
+func IndexController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesettings map[string]interface{}, zoomsettings map[string]interface{}, jwtkey *[]byte, poolcache *cache.Cache) {
 	tokenstring := string(ctx.Request.Header.Cookie("auth"))
 	if len(tokenstring) > 0 {
 		token, _ := jwt.Parse(tokenstring, func(token *jwt.Token) (interface{}, error) {
