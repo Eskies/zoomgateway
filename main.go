@@ -66,11 +66,11 @@ func main() {
 	r.PanicHandler = panicrouteHandler
 
 	r.GET("/", func(ctx *fasthttp.RequestCtx) {
-		controller.IndexController(dbConn, ctx, pagesettings, zoomsettings, &jwtkey, poolcache)
+		controller.IndexController(dbConn, ctx, pagesettings, zoomsettings, jwtkey, poolcache)
 	})
 
 	r.POST("/login", func(ctx *fasthttp.RequestCtx) {
-		controller.LoginController(dbConn, ctx, pagesettings, zoomsettings, &jwtkey, poolcache)
+		controller.LoginController(dbConn, ctx, pagesettings, zoomsettings, jwtkey, poolcache)
 	})
 
 	r.GET("/logout", func(ctx *fasthttp.RequestCtx) {
