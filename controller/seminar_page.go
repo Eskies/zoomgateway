@@ -28,8 +28,8 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 					<h6 class="card-subtitle text-white">Pembicara: $pembicara</h6>
 				</div>
 				<div class="card-body">
-					<p class="card-text">Seminar dimulai dari waktu $waktu_mulai hingga $waktu_selesai</p>
-					<p class="card-text">Join anda terakhir: $last_join dari IP $last_ip</p>
+					<p class="card-text">Seminar dilaksanakan tanggal <b>$tanggal_seminar</b> dari waktu <b>$waktu_mulai WITA</b> hingga <b>$waktu_selesai WITA</b></p>
+					<p class="card-text">Join anda terakhir: $last_join</p>
 					<a href="$link_seminar" class="btn btn-success btn-xs">
 						Join Seminar
 					</a>
@@ -39,7 +39,7 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 	`
 
 	sqlB := sqlbuilder.NewSelectBuilder()
-	sqlB.Select("sesi.id", "sesi.topik", "sesi.pembicara", "sesi.waktumulai", "sesi.waktuselesai", "pesertapersesi.waktulogin", "pesertapersesi.loginip")
+	sqlB.Select("sesi.id", "sesi.topik", "sesi.pembicara", `DATE_FORMAT(sesi.tanggal, "%d-%b-%Y")`, "sesi.waktumulai", "sesi.waktuselesai", `DATE_FORMAT(pesertapersesi.waktulogin, "jam %H:%i:%s tanggal %d-%b-%Y")`)
 	sqlB.From("pesertapersesi")
 	sqlB.Join("sesi", "sesi.id = pesertapersesi.sesi_id")
 	sqlB.Where(sqlB.E("peserta_id", ctx.UserValue("nimmhs").(string)))
@@ -53,18 +53,17 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 
 	defer qresults.Close()
 	for qresults.Next() {
-		var id, topik, pembicara, mulai, selesai string
-		var loginip sql.NullString
+		var id, topik, pembicara, tanggal, mulai, selesai string
 		var waktulogin sql.NullString
 
 		var err = qresults.Scan(
 			&id,
 			&topik,
 			&pembicara,
+			&tanggal,
 			&mulai,
 			&selesai,
 			&waktulogin,
-			&loginip,
 		)
 		if err != nil {
 			localtools.LogThisError(ctx, err.Error())
@@ -80,11 +79,6 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$last_join", waktulogin.String)
 		} else {
 			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$last_join", "(belum pernah join)")
-		}
-		if loginip.Valid {
-			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$last_ip", loginip.String)
-		} else {
-			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$last_ip", "(belum pernah join)")
 		}
 
 		daftarSeminar += buffSeminarItem
