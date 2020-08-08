@@ -6,11 +6,13 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"strings"
 	"time"
 	"zoomgateway/controller"
 	"zoomgateway/localtools"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/huandu/go-sqlbuilder"
 	"github.com/patrickmn/go-cache"
 
 	"github.com/benthor/clustersql"
@@ -92,6 +94,96 @@ func main() {
 		logOut(ctx)
 		ctx.SetConnectionClose()
 
+	})
+
+	r.GET("/loaderio-23ccbbd3adf2003fe6343081d9356a15/", func(ctx *fasthttp.RequestCtx) {
+		ctx.WriteString("loaderio-23ccbbd3adf2003fe6343081d9356a15")
+		ctx.SetConnectionClose()
+	})
+
+	r.GET("/test", func(ctx *fasthttp.RequestCtx) {
+		output := controller.SeminarTemplate()
+
+		output = strings.ReplaceAll(output, "$page_title", pagesettings["title"].(string))
+		output = strings.ReplaceAll(output, "$page_description", pagesettings["description"].(string))
+		output = strings.ReplaceAll(output, "$nim", "TEST")
+		output = strings.ReplaceAll(output, "$nama", "TEST")
+
+		//build list seminar
+		var daftarSeminar string = ``
+		templateDaftar := `
+			<div class="col-sm-12 mb-2">
+				<div class="card">
+					<div class="card-header bg-info text-white text-center">
+						<h5 class="card-title">Topik: $topik</h5>
+						<h6 class="card-subtitle text-white">Pembicara: $pembicara</h6>
+					</div>
+					<div class="card-body">
+						<p class="card-text">Seminar dilaksanakan tanggal <b>$tanggal_seminar</b> dari waktu <b>$waktu_mulai WITA</b> hingga <b>$waktu_selesai WITA</b></p>
+						<p class="card-text">Join anda terakhir: $last_join</p>
+						<a href="$link_seminar" class="btn btn-success btn-xs">
+							Join Seminar
+						</a>
+					</div>
+				</div>
+			</div>
+		`
+
+		sqlB := sqlbuilder.NewSelectBuilder()
+		sqlB.Select("sesi.id", "sesi.topik", "sesi.pembicara", `DATE_FORMAT(sesi.tanggal, "%d-%b-%Y")`, "sesi.waktumulai", "sesi.waktuselesai", `DATE_FORMAT(pesertapersesi.waktulogin, "jam %H:%i:%s tanggal %d-%b-%Y")`)
+		sqlB.From("pesertapersesi")
+		sqlB.Join("sesi", "sesi.id = pesertapersesi.sesi_id")
+		sqlB.Where(sqlB.E("peserta_id", 100))
+
+		a, b := sqlB.Build()
+		qresults, err := dbConn.Query(a, b...)
+		if err != nil {
+			localtools.LogThisError(ctx, err.Error())
+			return
+		}
+
+		defer qresults.Close()
+		for qresults.Next() {
+			var id, topik, pembicara, tanggal, mulai, selesai string
+			var waktulogin sql.NullString
+
+			var err = qresults.Scan(
+				&id,
+				&topik,
+				&pembicara,
+				&tanggal,
+				&mulai,
+				&selesai,
+				&waktulogin,
+			)
+			if err != nil {
+				localtools.LogThisError(ctx, err.Error())
+				return
+			}
+
+			buffSeminarItem := strings.ReplaceAll(templateDaftar, "$topik", topik)
+			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$pembicara", pembicara)
+			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$tanggal_seminar", tanggal)
+			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$waktu_mulai", mulai)
+			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$waktu_selesai", selesai)
+			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$link_seminar", "/joinseminar/"+id)
+			if waktulogin.Valid {
+				buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$last_join", waktulogin.String)
+			} else {
+				buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$last_join", "(belum pernah join)")
+			}
+
+			daftarSeminar += buffSeminarItem
+		}
+
+		output = strings.ReplaceAll(output, "$list_seminar", daftarSeminar)
+		ctx.WriteString(output)
+
+		ctx.Response.Header.SetContentType("text/html; charset=UTF-8")
+		ctx.SetConnectionClose()
+		ctx.SetStatusCode(200)
+
+		return
 	})
 
 	r.GET("/seminar", apiAuth(func(ctx *fasthttp.RequestCtx) {
