@@ -88,7 +88,6 @@ func IndexTemplate() string {
 				<div id="login-row" class="row justify-content-center align-items-center">
 					<div id="login-column" class="col-md-6">
 						<div id="login-box" class="col-md-12">
-							<form class="form">
 								<h3 class="text-center text-info">$page_title</h3>
 								<p class="text-center text-muted">$page_description</p>
 
@@ -100,7 +99,6 @@ func IndexTemplate() string {
 								<div class="form-group">
 									<button type="button" class="btn btn-block btn-info btn-md" id="login_btn">Masuk Seminar</button>
 								</div>
-							</form>
 						</div>
 					</div>
 				</div>
