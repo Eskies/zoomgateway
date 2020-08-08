@@ -1,0 +1,23 @@
+{
+    "config": {
+      "dbhost": {
+        "localhost": "127.0.0.1",
+        "db-node-01": "10.184.0.51",
+        "db-node-02": "10.184.0.52"
+      },
+      "dbport": "3306",
+      "dbuser" : "root",
+      "dbpassword" : "",
+      "dbname" : "zoomgateway",
+      "listenAddress" : "127.0.0.1:7000",
+      "jwtkey": "KElmo9Bp3SQ522KVE9Elzlqj7neIcnGu"
+    },
+    "pagesettings": {
+      "title" : "Kuliah Industri STIKOM BALI",
+      "description" : "AAAAAAA"
+    },
+    "zoomsettings": {
+      "api_key" : "",
+      "api_secret" : ""
+    }
+}
