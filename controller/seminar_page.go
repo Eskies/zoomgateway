@@ -72,6 +72,7 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 
 		buffSeminarItem := strings.ReplaceAll(templateDaftar, "$topik", topik)
 		buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$pembicara", pembicara)
+		buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$tanggal_seminar", tanggal)
 		buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$waktu_mulai", mulai)
 		buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$waktu_selesai", selesai)
 		buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$link_seminar", "/joinseminar/"+id)
