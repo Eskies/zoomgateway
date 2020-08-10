@@ -2,6 +2,7 @@ package controller
 
 import (
 	"database/sql"
+	"fmt"
 	"zoomgateway/localtools"
 
 	"github.com/huandu/go-sqlbuilder"
@@ -46,7 +47,7 @@ func TokenSeminarController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesettin
 	reply.APIKey = apikey
 	reply.MeetingNumber = meetid
 	reply.Password = meetpass
-	reply.UserName = namapeserta
+	reply.UserName = fmt.Sprintf("[M-%s] %s", idpeserta, namapeserta)
 	reply.APISecret = apisecret
 
 	localtools.DoJSONWrite(ctx, 200, reply)

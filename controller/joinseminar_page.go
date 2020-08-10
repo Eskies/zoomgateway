@@ -68,6 +68,14 @@ func JoinSeminarTemplate() string {
 		<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 	</head>
 	<body>
+		<div id="overlaywait" style="
+		position: absolute;
+		top: 10%;
+		left: 10%;
+		width: 80%;
+		height: 80%;
+		z-index: 10;
+		background-color: rgba(0,0,0,0.5); /*dim the background*/"><h1 style="color: #fff;text-align: center;">Sedang menyiapkan perangkat dan menghubungi server untuk otorisasi</h1></div>
 		<!-- import ZoomMtg dependencies -->
 		<script src="https://source.zoom.us/1.7.10/lib/vendor/react.min.js"></script>
 		<script src="https://source.zoom.us/1.7.10/lib/vendor/react-dom.min.js"></script>
@@ -110,12 +118,14 @@ func JoinSeminarTemplate() string {
 										passWord: data.password,
 										success: (success) => {
 											console.log(success);
+											$("#overlaywait").hide();
 											ZoomMtg.showInviteFunction({
 												show: false,
 											});
 										},
 										error: (error) => {
 											console.log(error);
+											$("#overlaywait").hide();
 										}
 									});
 								}
