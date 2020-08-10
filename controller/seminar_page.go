@@ -38,7 +38,7 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 				</div>
 			</div>
 		`
-		templateYoutube = strings.ReplaceAll(templateYoutube, "$KODEYOUTUBE", ctx.UserValue("youtubeheader").(string))
+		templateYoutube = strings.ReplaceAll(templateYoutube, "$KODEYOUTUBE", pagesettings["youtubeheader"].(string))
 		output = strings.ReplaceAll(output, "<!--LOKASIYOUTUBE-->", templateYoutube)
 	}
 
