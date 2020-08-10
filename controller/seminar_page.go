@@ -18,6 +18,30 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 	output = strings.ReplaceAll(output, "$nim", ctx.UserValue("nimmhs").(string))
 	output = strings.ReplaceAll(output, "$nama", ctx.UserValue("namamhs").(string))
 
+	//embedyoutube?
+	if len(pagesettings["youtubeheader"].(string)) > 0 {
+		templateYoutube := `
+			<div class="row justify-content-center align-items-center mt-5">
+				<div class="col-md-6 col-xl-4">
+					<div style="position: relative;
+					width: 100%;
+					height: 0;
+					padding-bottom: 56.25%;">
+						<iframe src="//www.youtube.com/embed/$KODEYOUTUBE?controls=0&autoplay=1" 
+						frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen 
+						style="position: absolute;
+						top: 0;
+						left: 0;
+						width: 100%;
+						height: 100%;"></iframe>
+					</div>
+				</div>
+			</div>
+		`
+		templateYoutube = strings.ReplaceAll(templateYoutube, "$KODEYOUTUBE", ctx.UserValue("youtubeheader").(string))
+		output = strings.ReplaceAll(output, "<!--LOKASIYOUTUBE-->", templateYoutube)
+	}
+
 	//build list seminar
 	var daftarSeminar string = ``
 	templateDaftar := `
@@ -30,16 +54,14 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 				<div class="card-body">
 					<p class="card-text">Seminar dilaksanakan tanggal <b>$tanggal_seminar</b> dari waktu <b>$waktu_mulai WITA</b> hingga <b>$waktu_selesai WITA</b></p>
 					<p class="card-text">Join anda terakhir: $last_join</p>
-					<a href="$link_seminar" class="btn btn-success btn-xs">
-						Join Seminar
-					</a>
+					$tombol_join
 				</div>
 			</div>
 		</div>
 	`
 
 	sqlB := sqlbuilder.NewSelectBuilder()
-	sqlB.Select("sesi.id", "sesi.topik", "sesi.pembicara", `DATE_FORMAT(sesi.tanggal, "%d-%b-%Y")`, "sesi.waktumulai", "sesi.waktuselesai", `DATE_FORMAT(pesertapersesi.waktulogin, "jam %H:%i:%s tanggal %d-%b-%Y")`)
+	sqlB.Select("sesi.id", "sesi.topik", "sesi.pembicara", `DATE_FORMAT(sesi.tanggal, "%d-%b-%Y")`, "sesi.waktumulai", "sesi.waktuselesai", `DATE_FORMAT(pesertapersesi.waktulogin, "jam %H:%i:%s tanggal %d-%b-%Y")`, "sesi.status")
 	sqlB.From("pesertapersesi")
 	sqlB.Join("sesi", "sesi.id = pesertapersesi.sesi_id")
 	sqlB.Where(sqlB.E("peserta_id", ctx.UserValue("nimmhs").(string)))
@@ -53,7 +75,7 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 
 	defer qresults.Close()
 	for qresults.Next() {
-		var id, topik, pembicara, tanggal, mulai, selesai string
+		var id, topik, pembicara, tanggal, mulai, selesai, statusesi string
 		var waktulogin sql.NullString
 
 		var err = qresults.Scan(
@@ -64,6 +86,7 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 			&mulai,
 			&selesai,
 			&waktulogin,
+			&statusesi,
 		)
 		if err != nil {
 			localtools.LogThisError(ctx, err.Error())
@@ -75,7 +98,14 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 		buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$tanggal_seminar", tanggal)
 		buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$waktu_mulai", mulai)
 		buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$waktu_selesai", selesai)
-		buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$link_seminar", "/joinseminar/"+id)
+
+		if statusesi == "1" {
+			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$tombol_join", `<a href="$link_seminar" class="btn btn-success btn-xs">Join Seminar</a>`)
+			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$link_seminar", "/joinseminar/"+id)
+		} else {
+			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$tombol_join", ``)
+		}
+
 		if waktulogin.Valid {
 			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$last_join", waktulogin.String)
 		} else {
@@ -147,6 +177,7 @@ func SeminarTemplate() string {
 					<a href="/logout" class="text-danger"><button class="btn btn-danger btn-xs">Logout!</button></a>
 				</div>
 			</div>
+			<!--LOKASIYOUTUBE-->
 			<div class="row justify-content-center align-items-center mt-5">
 				<div class="col-md-6">
 					<h3 class="text-center text-info">Seminar yang berhak anda ikuti</h3>
