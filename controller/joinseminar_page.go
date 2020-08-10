@@ -98,6 +98,9 @@ func JoinSeminarTemplate() string {
 								leaveUrl: "/seminar",
 								isSupportAV: true,
 								screenShare: false,
+								showMeetingHeader: false,
+								disableInvite: true,
+								inviteUrlFormat: 'hide',
 								success: function() {
 									ZoomMtg.join({
 										signature: res.result,

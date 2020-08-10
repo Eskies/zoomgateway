@@ -22,7 +22,7 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 	if len(pagesettings["youtubeheader"].(string)) > 0 {
 		templateYoutube := `
 			<div class="row justify-content-center align-items-center mt-5">
-				<div class="col-md-6 col-xl-4">
+				<div class="col-md-6">
 					<div style="position: relative;
 					width: 100%;
 					height: 0;

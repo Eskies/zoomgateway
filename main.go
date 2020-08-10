@@ -98,6 +98,13 @@ func main() {
 		controller.SeminarPageController(dbConn, ctx, pagesettings, zoomsettings)
 	}))
 
+	r.GET("/ots", apiAuth(func(ctx *fasthttp.RequestCtx) {
+		controller.OnthespotPageController(dbConn, ctx, pagesettings, zoomsettings)
+	}))
+	r.POST("/otsdaftar", apiAuth(func(ctx *fasthttp.RequestCtx) {
+		controller.OTSDaftar(dbConn, ctx, pagesettings, zoomsettings)
+	}))
+
 	r.GET("/joinseminar/{idsesi}", apiAuth(func(ctx *fasthttp.RequestCtx) {
 		controller.JoinSeminarController(dbConn, ctx, pagesettings, zoomsettings)
 	}))
