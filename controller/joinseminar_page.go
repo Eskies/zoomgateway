@@ -142,6 +142,16 @@ func JoinSeminarTemplate() string {
 				$.get("/retoken")
 				.done(function(data){
 
+				})
+				.fail(function(a,b,c){
+					if (b == 307) {
+						Swal.fire({
+							type: 'error',
+							title: 'Anda tidak terautentikasi',
+							text: "Mohon Login Ulang",
+						});
+						window.location.replace("/");
+					}
 				});
 			}, 270000);
 		})
