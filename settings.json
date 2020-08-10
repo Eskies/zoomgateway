@@ -15,7 +15,8 @@
     "pagesettings": {
       "title" : "Kuliah Industri STIKOM BALI",
       "description" : "AAAAAAA",
-      "youtubeheader" : "yJXDu0bud1Q"
+      "youtubeheader" : "yJXDu0bud1Q",
+      "alamatpulldata": "http://kulindus.stikom-bali.ac.id/getsesi.php"
     },
     "zoomsettings": {
       "api_key" : "",

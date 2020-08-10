@@ -11,7 +11,10 @@ import (
 	"zoomgateway/localtools"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/go-resty/resty"
+	"github.com/huandu/go-sqlbuilder"
 	"github.com/patrickmn/go-cache"
+	"github.com/tidwall/gjson"
 
 	"github.com/benthor/clustersql"
 	"github.com/fasthttp/router"
@@ -116,6 +119,165 @@ func main() {
 	r.GET("/retoken", apiAuth(func(ctx *fasthttp.RequestCtx) {
 		ctx.SetStatusCode(200)
 	}))
+
+	r.POST("/pushsesi", func(ctx *fasthttp.RequestCtx) {
+		nimmhs := string(ctx.FormValue("nim"))
+		namamhs := string(ctx.FormValue("nama"))
+		idsesiluar := string(ctx.FormValue("idsesi"))
+
+		sqla := sqlbuilder.NewSelectBuilder()
+		sqla.Select("COUNT(*)")
+		sqla.From("peserta")
+		sqla.Where(sqla.E("id", nimmhs))
+		a, b := sqla.Build()
+
+		var nimada int
+		err := dbConn.QueryRow(a, b...).Scan(&nimada)
+		if err != nil {
+			localtools.LogThisError(ctx, err.Error())
+			return
+		}
+
+		if nimada == 0 {
+			sqlb := sqlbuilder.NewInsertBuilder()
+			sqlb.InsertInto("peserta")
+			sqlb.Cols("id", "nama")
+			sqlb.Values(nimmhs, namamhs)
+			c, d := sqlb.Build()
+			_, err := dbConn.Exec(c, d...)
+			if err != nil {
+				localtools.LogThisError(ctx, err.Error())
+				return
+			}
+		}
+
+		//KARENA BEDA ID SESI
+		sqlx := sqlbuilder.NewSelectBuilder()
+		sqlx.Select("id")
+		sqlx.From("sesi")
+		sqlx.Where(sqlx.E("idluarsistem", idsesiluar))
+		x, y := sqlx.Build()
+		var sesi string
+		err = dbConn.QueryRow(x, y...).Scan(&sesi)
+		if err != nil {
+			localtools.LogThisError(ctx, err.Error())
+			return
+		}
+
+		sqlc := sqlbuilder.NewInsertBuilder()
+		sqlc.InsertInto("pesertapersesi")
+		sqlc.Cols("peserta_id", "sesi_id")
+		sqlc.Values(nimmhs, sesi)
+		e, f := sqlc.Build()
+		_, err = dbConn.Exec(e, f...)
+		if err != nil {
+			localtools.LogThisError(ctx, err.Error())
+			return
+		}
+	})
+
+	r.GET("/tarikdata", func(ctx *fasthttp.RequestCtx) {
+
+		sqlo := sqlbuilder.NewSelectBuilder()
+		sqlo.Select("waktutarik")
+		sqlo.From("pesertapersesi")
+		sqlo.OrderBy("waktutarik").Desc()
+		o, _ := sqlo.Build()
+		var waktutariksql sql.NullString
+		var waktutarik string
+		err = dbConn.QueryRow(o).Scan(&waktutariksql)
+
+		if waktutariksql.Valid && err == nil {
+			waktutarik = waktutariksql.String
+		} else {
+			waktutarik = "2000-01-01 00:00:00"
+		}
+
+		httpclient := resty.New()
+		resp, err := httpclient.R().
+			SetFormData(map[string]string{
+				"lasttarik": waktutarik,
+			}).
+			Post(pagesettings["alamatpulldata"].(string))
+
+		if err != nil {
+			localtools.LogThisError(ctx, err.Error())
+			return
+		}
+
+		if resp.StatusCode() != 200 {
+			localtools.LogThisError(ctx, "Master Error: "+resp.String())
+			return
+		}
+		if !gjson.Valid(resp.String()) {
+			localtools.LogThisError(ctx, "Data yang dikirim tidak sesuai.")
+			return
+		}
+		jsonreply := gjson.Parse(resp.String())
+
+		for _, value := range jsonreply.Array() {
+
+			nimmhs := value.Get("nim").String()
+			namamhs := value.Get("nama").String()
+			idsesiluar := value.Get("id_jadwal").String()
+			waktuupdate := value.Get("waktu_update").String()
+
+			sqla := sqlbuilder.NewSelectBuilder()
+			sqla.Select("COUNT(*)")
+			sqla.From("peserta")
+			sqla.Where(sqla.E("id", nimmhs))
+			a, b := sqla.Build()
+
+			var nimada int
+			err := dbConn.QueryRow(a, b...).Scan(&nimada)
+			if err != nil {
+				localtools.LogThisError(ctx, err.Error())
+				return
+			}
+
+			if nimada == 0 {
+				sqlb := sqlbuilder.NewInsertBuilder()
+				sqlb.InsertInto("peserta")
+				sqlb.Cols("id", "nama")
+				sqlb.Values(nimmhs, namamhs)
+				c, d := sqlb.Build()
+				_, err := dbConn.Exec(c, d...)
+				if err != nil {
+					localtools.LogThisError(ctx, err.Error())
+					return
+				}
+			}
+
+			//KARENA BEDA ID SESI
+			sqlx := sqlbuilder.NewSelectBuilder()
+			sqlx.Select("id")
+			sqlx.From("sesi")
+			sqlx.Where(sqlx.E("idluarsistem", idsesiluar))
+			x, y := sqlx.Build()
+			var sesi string
+			err = dbConn.QueryRow(x, y...).Scan(&sesi)
+			if err != nil {
+				localtools.LogThisError(ctx, err.Error())
+				return
+			}
+
+			sqlc := sqlbuilder.NewInsertBuilder()
+			sqlc.InsertInto("pesertapersesi")
+			sqlc.Cols("peserta_id", "sesi_id", "waktutarik")
+			sqlc.Values(nimmhs, sesi, waktuupdate)
+			e, f := sqlc.Build()
+			_, err = dbConn.Exec(e, f...)
+			if err != nil {
+				localtools.LogThisError(ctx, err.Error())
+				return
+			}
+		}
+
+		ctx.SetStatusCode(200)
+
+		ctx.WriteString(fmt.Sprintf("SYNCED TARIK SETELAH WAKTU %s DARI WEB %s SEBANYAK %d DATA", waktutarik, pagesettings["alamatpulldata"].(string), len(jsonreply.Array())))
+		return
+	})
 
 	s := &fasthttp.Server{
 		Handler:           r.Handler,

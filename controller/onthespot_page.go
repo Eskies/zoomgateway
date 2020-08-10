@@ -106,6 +106,9 @@ func oTSTemplate() string {
 				</div>
 			</div>
 			<div class="row justify-content-center align-items-center mt-5">
+				<div class="col-md-6"><a href="/tarikdata" target="_blank" class="btn btn-primary btn-block">Klik Saya Untuk SYNC data dari master</a></div>
+			</div>
+			<div class="row justify-content-center align-items-center mt-5">
 				<div class="col-md-6">
 					<h3 class="text-center text-info">Pendaftaran On The Spot</h3>
 					<div class="row">
@@ -207,40 +210,57 @@ func OTSDaftar(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesettings map[string
 	namamhs := string(ctx.FormValue("namamhs"))
 	sesi := string(ctx.FormValue("sesi"))
 
-	sqla := sqlbuilder.NewSelectBuilder()
-	sqla.Select("COUNT(*)")
-	sqla.From("peserta")
-	sqla.Where(sqla.E("id", nimmhs))
-	a, b := sqla.Build()
+	sqlx := sqlbuilder.NewSelectBuilder()
+	sqlx.Select("COUNT(*)")
+	sqlx.From("pesertapersesi")
+	sqlx.Where(
+		sqlx.E("peserta_id", nimmhs),
+		sqlx.E("sesi_id", sesi),
+	)
+	x, y := sqlx.Build()
 
-	var nimada int
-	err := dbConn.QueryRow(a, b...).Scan(&nimada)
-	if err != nil {
-		localtools.LogThisError(ctx, err.Error())
-		return
-	}
+	var sudahmasuksesi int
+	err := dbConn.QueryRow(x, y...).Scan(&sudahmasuksesi)
+	if sudahmasuksesi == 0 && err == nil {
+		sqla := sqlbuilder.NewSelectBuilder()
+		sqla.Select("COUNT(*)")
+		sqla.From("peserta")
+		sqla.Where(sqla.E("id", nimmhs))
+		a, b := sqla.Build()
 
-	if nimada == 0 {
-		sqlb := sqlbuilder.NewInsertBuilder()
-		sqlb.InsertInto("peserta")
-		sqlb.Cols("id", "nama")
-		sqlb.Values(nimmhs, namamhs)
-		c, d := sqlb.Build()
-		_, err := dbConn.Exec(c, d...)
+		var nimada int
+		err := dbConn.QueryRow(a, b...).Scan(&nimada)
 		if err != nil {
 			localtools.LogThisError(ctx, err.Error())
 			return
 		}
-	}
 
-	sqlc := sqlbuilder.NewInsertBuilder()
-	sqlc.InsertInto("pesertapersesi")
-	sqlc.Cols("peserta_id", "sesi_id")
-	sqlc.Values(nimmhs, sesi)
-	e, f := sqlc.Build()
-	_, err = dbConn.Exec(e, f...)
-	if err != nil {
-		localtools.LogThisError(ctx, err.Error())
+		if nimada == 0 {
+			sqlb := sqlbuilder.NewInsertBuilder()
+			sqlb.InsertInto("peserta")
+			sqlb.Cols("id", "nama")
+			sqlb.Values(nimmhs, namamhs)
+			c, d := sqlb.Build()
+			_, err := dbConn.Exec(c, d...)
+			if err != nil {
+				localtools.LogThisError(ctx, err.Error())
+				return
+			}
+		}
+
+		sqlc := sqlbuilder.NewInsertBuilder()
+		sqlc.InsertInto("pesertapersesi")
+		sqlc.Cols("peserta_id", "sesi_id")
+		sqlc.Values(nimmhs, sesi)
+		e, f := sqlc.Build()
+		_, err = dbConn.Exec(e, f...)
+		if err != nil {
+			localtools.LogThisError(ctx, err.Error())
+			return
+		}
+	} else {
+		ctx.WriteString("Mahasiswa sudah masuk sesi ini")
+		ctx.SetStatusCode(400)
 		return
 	}
 

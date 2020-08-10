@@ -18,6 +18,12 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 	output = strings.ReplaceAll(output, "$nim", ctx.UserValue("nimmhs").(string))
 	output = strings.ReplaceAll(output, "$nama", ctx.UserValue("namamhs").(string))
 
+	if len(ctx.UserValue("nimmhs").(string)) == 3 {
+		output = strings.ReplaceAll(output, "<!--LINKOTS-->", `<div class="row justify-content-center align-items-center mt-5">
+		<div class="col-md-6"><a href="/ots" class="btn btn-primary btn-block">Klik Saya Untuk Menuju ke Pendaftaran OTS</a></div>
+		</div>`)
+	}
+
 	//embedyoutube?
 	if len(pagesettings["youtubeheader"].(string)) > 0 {
 		templateYoutube := `
@@ -65,6 +71,7 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 	sqlB.From("pesertapersesi")
 	sqlB.Join("sesi", "sesi.id = pesertapersesi.sesi_id")
 	sqlB.Where(sqlB.E("peserta_id", ctx.UserValue("nimmhs").(string)))
+	sqlB.OrderBy("sesi.tanggal ASC, sesi.waktumulai ASC")
 
 	a, b := sqlB.Build()
 	qresults, err := dbConn.Query(a, b...)
@@ -178,6 +185,7 @@ func SeminarTemplate() string {
 				</div>
 			</div>
 			<!--LOKASIYOUTUBE-->
+			<!--LINKOTS-->
 			<div class="row justify-content-center align-items-center mt-5">
 				<div class="col-md-6">
 					<h3 class="text-center text-info">Seminar yang berhak anda ikuti</h3>

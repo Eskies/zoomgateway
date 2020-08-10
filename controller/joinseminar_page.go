@@ -19,7 +19,6 @@ func JoinSeminarController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 	sqlb.Update("pesertapersesi")
 	sqlb.Set(
 		sqlb.Assign("waktulogin", time.Now().Format("2006-01-02 15:04:05")),
-		sqlb.Assign("loginip", ctx.RemoteIP().String()),
 	)
 	sqlb.Where(
 		sqlb.E("peserta_id", idpeserta),
@@ -101,6 +100,7 @@ func JoinSeminarTemplate() string {
 								showMeetingHeader: false,
 								disableInvite: true,
 								inviteUrlFormat: 'hide',
+								meetingInfo: ['topic', 'host',],
 								success: function() {
 									ZoomMtg.join({
 										signature: res.result,
@@ -109,10 +109,13 @@ func JoinSeminarTemplate() string {
 										apiKey: data.apiKey,
 										passWord: data.password,
 										success: (success) => {
-											console.log(success)
+											console.log(success);
+											ZoomMtg.showInviteFunction({
+												show: false,
+											});
 										},
 										error: (error) => {
-											console.log(error)
+											console.log(error);
 										}
 									});
 								}
