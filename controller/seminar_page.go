@@ -2,10 +2,13 @@ package controller
 
 import (
 	"database/sql"
+	"fmt"
 	"strings"
 	"zoomgateway/localtools"
 
 	"github.com/huandu/go-sqlbuilder"
+
+	b64 "encoding/base64"
 
 	"github.com/valyala/fasthttp"
 )
@@ -60,6 +63,7 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 				<div class="card-body">
 					<p class="card-text">Seminar dilaksanakan tanggal <b>$tanggal_seminar</b> dari waktu <b>$waktu_mulai WITA</b> hingga <b>$waktu_selesai WITA</b></p>
 					<p class="card-text">Join anda terakhir: $last_join</p>
+					<p class="card-text">Jika anda diminta password, passwordnya : kulindus20</p>
 					$tombol_join
 				</div>
 			</div>
@@ -67,7 +71,7 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 	`
 
 	sqlB := sqlbuilder.NewSelectBuilder()
-	sqlB.Select("sesi.id", "sesi.topik", "sesi.pembicara", `DATE_FORMAT(sesi.tanggal, "%d-%b-%Y")`, "sesi.waktumulai", "sesi.waktuselesai", `DATE_FORMAT(pesertapersesi.waktulogin, "jam %H:%i:%s tanggal %d-%b-%Y")`, "sesi.status")
+	sqlB.Select("sesi.id", "sesi.topik", "sesi.pembicara", `DATE_FORMAT(sesi.tanggal, "%d-%b-%Y")`, "sesi.waktumulai", "sesi.waktuselesai", `DATE_FORMAT(pesertapersesi.waktulogin, "jam %H:%i:%s tanggal %d-%b-%Y")`, "sesi.status", "sesi.meetingid")
 	sqlB.From("pesertapersesi")
 	sqlB.Join("sesi", "sesi.id = pesertapersesi.sesi_id")
 	sqlB.Where(sqlB.E("peserta_id", ctx.UserValue("nimmhs").(string)))
@@ -82,7 +86,7 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 
 	defer qresults.Close()
 	for qresults.Next() {
-		var id, topik, pembicara, tanggal, mulai, selesai, statusesi string
+		var id, topik, pembicara, tanggal, mulai, selesai, statusesi, meetingid string
 		var waktulogin sql.NullString
 
 		var err = qresults.Scan(
@@ -94,6 +98,7 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 			&selesai,
 			&waktulogin,
 			&statusesi,
+			&meetingid,
 		)
 		if err != nil {
 			localtools.LogThisError(ctx, err.Error())
@@ -107,8 +112,16 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 		buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$waktu_selesai", selesai)
 
 		if statusesi == "1" {
-			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$tombol_join", `<a href="$link_seminar" class="btn btn-success btn-xs">Join Seminar</a>`)
+			idpeserta := ctx.UserValue("nimmhs").(string)
+			namapeserta := ctx.UserValue("namamhs").(string)
+			namafull := fmt.Sprintf("[M-%s] %s", idpeserta, namapeserta)
+
+			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$tombol_join", `<a href="$link_seminar" class="btn btn-success btn-xs">Join Seminar</a>$tombol_join2`)
 			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$link_seminar", "/joinseminar/"+id)
+			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$tombol_join2", `<a target="_blank" href="https://zoom.us/wc/$MEETID/join?prefer=1&un=$UNAME=" class="btn btn-warning btn-xs">Join Seminar #2</a>`)
+			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$MEETID", meetingid)
+			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$UNAME", b64.StdEncoding.EncodeToString([]byte(namafull)))
+
 		} else {
 			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$tombol_join", ``)
 		}
