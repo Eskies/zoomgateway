@@ -189,9 +189,24 @@ func SeminarTemplate() string {
 			<div class="row justify-content-center align-items-center mt-5">
 				<div class="col-md-6">
 					<h3 class="text-center text-info">Seminar yang berhak anda ikuti</h3>
+					<p class="text-muted text-center">Informasi ada di bagian bawah halaman</p>
 					<div class="row">
 						$list_seminar
 					</div>
+				</div>
+			</div>
+
+			<div class="row justify-content-center align-items-center mt-5">
+				<div class="col-md-6">
+					<h3 class="text-center text-info">Informasi</h3>
+					<ul class="list-group">
+						<li class="list-group-item">Tombol Join akan muncul ketika sesi sudah dibuka, silahkan refresh halaman ini untuk melihat sesi sudah dibuka atau belum</li>
+						<li class="list-group-item">Sesi dibuka sesuai dengan jadwal yang tercantum pada daftar.</li>
+						<li class="list-group-item">Jika saat terkoneksi mengalami kendala berupa "Tanda tangan sudah kaduluarsa / Signature Expired" pastikan jam di HP / Komputer anda telah tersinkronisasi dengan waktu server.</li>
+						<li class="list-group-item">Jika suara tidak terdengar, pastikan anda mengijinkan (allow) browser untuk menggunakan audio (speaker / microphone)</li>
+						<li class="list-group-item">Sangat disarankan untuk menggunakan komputer via browser (Chrome / Mozzila) untuk mengikuti seminar ini.</li>
+						<li class="list-group-item">Namun jika anda masih terkendala, silahkan menggunakan Aplikasi Zoom (bukan via browser). Join terlebih dahulu menggunakan browser kemudian klik tombol (i) di pojok kiri atas untuk mendapatkan link atau meeting id dan password. Pastikan atur nama anda ketika join dengan NIM dan Nama anda.</li>
+					</ul>
 				</div>
 			</div>
 		</div>

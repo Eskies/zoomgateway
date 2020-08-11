@@ -108,7 +108,7 @@ func JoinSeminarTemplate() string {
 								showMeetingHeader: false,
 								disableInvite: true,
 								inviteUrlFormat: 'hide',
-								meetingInfo: ['topic', 'host',],
+								meetingInfo: ['topic','host','mn','pwd',],
 								success: function() {
 									ZoomMtg.join({
 										signature: res.result,
@@ -136,14 +136,8 @@ func JoinSeminarTemplate() string {
 					
 				})
 				.fail(function(a,b,c){
-					Swal.fire({
-						type: 'error',
-						title: 'Login Gagal: ' + c,
-						text: a.responseText,
-					});
+					window.location.replace("/seminar");
 				});
-
-				
 				
 
 			});
@@ -157,13 +151,7 @@ func JoinSeminarTemplate() string {
 
 				})
 				.fail(function(a,b,c){
-					if (b == 307) {
-						Swal.fire({
-							type: 'error',
-							title: 'Anda tidak terautentikasi',
-							text: "Mohon Login Ulang",
-						});
-						window.location.replace("/");
+					if (b == 307) {						
 					}
 				});
 			}, 270000);
