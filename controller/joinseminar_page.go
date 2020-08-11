@@ -108,7 +108,6 @@ func JoinSeminarTemplate() string {
 								showMeetingHeader: false,
 								disableInvite: true,
 								inviteUrlFormat: 'hide',
-								meetingInfo: ['topic','host','mn','pwd',],
 								success: function() {
 									ZoomMtg.join({
 										signature: res.result,

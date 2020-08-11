@@ -202,7 +202,7 @@ func SeminarTemplate() string {
 					<ul class="list-group">
 						<li class="list-group-item">Tombol Join akan muncul ketika sesi sudah dibuka, silahkan refresh halaman ini untuk melihat sesi sudah dibuka atau belum</li>
 						<li class="list-group-item">Sesi dibuka sesuai dengan jadwal yang tercantum pada daftar.</li>
-						<li class="list-group-item">Jika saat terkoneksi mengalami kendala berupa "Tanda tangan sudah kaduluarsa / Signature Expired" pastikan jam di HP / Komputer anda telah tersinkronisasi dengan waktu server.</li>
+						<li class="list-group-item">Jika saat terkoneksi mengalami kendala berupa "Tanda tangan sudah kaduluarsa / Signature Expired" pastikan jam di HP / Komputer anda telah tersinkronisasi dengan waktu GMT/UTC.</li>
 						<li class="list-group-item">Jika suara tidak terdengar, pastikan anda mengijinkan (allow) browser untuk menggunakan audio (speaker / microphone)</li>
 						<li class="list-group-item">Sangat disarankan untuk menggunakan komputer via browser (Chrome / Mozzila) untuk mengikuti seminar ini.</li>
 						<li class="list-group-item">Namun jika anda masih terkendala, silahkan menggunakan Aplikasi Zoom (bukan via browser). Join terlebih dahulu menggunakan browser kemudian klik tombol (i) di pojok kiri atas untuk mendapatkan link atau meeting id dan password. Pastikan atur nama anda ketika join dengan NIM dan Nama anda.</li>
