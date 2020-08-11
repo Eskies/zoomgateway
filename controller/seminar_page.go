@@ -2,13 +2,10 @@ package controller
 
 import (
 	"database/sql"
-	"fmt"
 	"strings"
 	"zoomgateway/localtools"
 
 	"github.com/huandu/go-sqlbuilder"
-
-	b64 "encoding/base64"
 
 	"github.com/valyala/fasthttp"
 )
@@ -112,15 +109,17 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 		buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$waktu_selesai", selesai)
 
 		if statusesi == "1" {
-			idpeserta := ctx.UserValue("nimmhs").(string)
-			namapeserta := ctx.UserValue("namamhs").(string)
-			namafull := fmt.Sprintf("[M-%s] %s", idpeserta, namapeserta)
+			//idpeserta := ctx.UserValue("nimmhs").(string)
+			//namapeserta := ctx.UserValue("namamhs").(string)
+			//namafull := fmt.Sprintf("[M-%s] %s", idpeserta, namapeserta)
 
-			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$tombol_join", `<a href="$link_seminar" class="btn btn-success btn-xs">Join Seminar</a>$tombol_join2`)
+			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$tombol_join", `<a href="$link_seminar" class="btn btn-success btn-xs">Join Seminar</a>`)
 			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$link_seminar", "/joinseminar/"+id)
-			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$tombol_join2", `<a target="_blank" href="https://zoom.us/wc/$MEETID/join?prefer=1&un=$UNAME=" class="btn btn-warning btn-xs">Join Seminar #2</a>`)
-			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$MEETID", meetingid)
-			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$UNAME", b64.StdEncoding.EncodeToString([]byte(namafull)))
+			/*
+				buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$tombol_join2", `<a target="_blank" href="https://zoom.us/wc/$MEETID/join?prefer=1&un=$UNAME=" class="btn btn-warning btn-xs">Join Seminar #2</a>`)
+				buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$MEETID", meetingid)
+				buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$UNAME", b64.StdEncoding.EncodeToString([]byte(namafull)))
+			*/
 
 		} else {
 			buffSeminarItem = strings.ReplaceAll(buffSeminarItem, "$tombol_join", ``)
