@@ -60,7 +60,6 @@ func SeminarPageController(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesetting
 				<div class="card-body">
 					<p class="card-text">Seminar dilaksanakan tanggal <b>$tanggal_seminar</b> dari waktu <b>$waktu_mulai WITA</b> hingga <b>$waktu_selesai WITA</b></p>
 					<p class="card-text">Join anda terakhir: $last_join</p>
-					<p class="card-text">Jika anda diminta password, passwordnya : kulindus20</p>
 					$tombol_join
 				</div>
 			</div>
