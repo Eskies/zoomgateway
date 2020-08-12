@@ -111,9 +111,6 @@ func JoinSeminarTemplate() string {
 								meetingInfo: [
 								'topic',
 								'host',
-								'mn',
-								'pwd',
-								'participant',
 								],
 								success: function() {
 									ZoomMtg.join({

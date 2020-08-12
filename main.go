@@ -108,6 +108,10 @@ func main() {
 		controller.OTSDaftar(dbConn, ctx, pagesettings, zoomsettings)
 	}))
 
+	r.POST("/infomhs", apiAuth(func(ctx *fasthttp.RequestCtx) {
+		controller.CariMhs(dbConn, ctx, pagesettings, zoomsettings)
+	}))
+
 	r.GET("/joinseminar/{idsesi}", apiAuth(func(ctx *fasthttp.RequestCtx) {
 		controller.JoinSeminarController(dbConn, ctx, pagesettings, zoomsettings)
 	}))

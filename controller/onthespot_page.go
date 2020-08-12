@@ -110,6 +110,28 @@ func oTSTemplate() string {
 			</div>
 			<div class="row justify-content-center align-items-center mt-5">
 				<div class="col-md-6">
+					<h3 class="text-center text-info">Info Mhs</h3>
+					<div class="row">
+						<div class="col-md-12">
+							<div class="form-group">
+								<label>ID / NIM</label>
+								<input type="text" class="form-control" id="cari_nimmhs">
+							</div>
+							<div class="form-group">
+								<label>Nama Peserta</label>
+								<button type="button" class="btn btn-primary" id="cmd_cari">Cari Data</button>
+							</div>
+							<div class="form-group">
+								<p id="outputcari">
+
+								</p>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="row justify-content-center align-items-center mt-5">
+				<div class="col-md-6">
 					<h3 class="text-center text-info">Pendaftaran On The Spot</h3>
 					<div class="row">
 						<div class="col-md-12">
@@ -168,6 +190,25 @@ func oTSTemplate() string {
 					Swal.fire({
 					  type: 'error',
 					  title: 'Gagal Simpan: ' + c,
+					  text: a.responseText,
+					});
+				});
+			});
+
+			$("#cmd_cari").click(function(){
+				
+				$("#outputcari").html("TIDAK ADA DATA");
+				var datapost = {
+					'nimmhs': $('#cari_nimmhs').val(),
+				};
+				$.post("/infomhs", datapost)
+				.done(function(data){
+					$("#outputcari").html(data);
+				})
+				.fail(function(a,b,c){
+					Swal.fire({
+					  type: 'error',
+					  title: c,
 					  text: a.responseText,
 					});
 				});
@@ -264,4 +305,58 @@ func OTSDaftar(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesettings map[string
 		return
 	}
 
+}
+
+func CariMhs(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesettings map[string]interface{}, zoomsettings map[string]interface{}) {
+	if len(ctx.UserValue("nimmhs").(string)) > 3 {
+		localtools.LogThisErrorWCode(ctx, 400, "YOU DONT HAVE ACCESS")
+		return
+	}
+
+	ctx.SetStatusCode(200)
+
+	nimmhs := string(ctx.FormValue("nimmhs"))
+
+	sqlx := sqlbuilder.NewSelectBuilder()
+	sqlx.Select("peserta.id", "peserta.nama", "sesi.pembicara", "sesi.topik", "sesi.meetingid", "sesi.password", "pesertapersesi.waktulogin")
+	sqlx.From("pesertapersesi")
+	sqlx.Join("peserta", "peserta.id = pesertapersesi.peserta_id")
+	sqlx.Join("sesi", "sesi.id = pesertapersesi.sesi_id")
+	sqlx.Where(
+		sqlx.E("peserta_id", nimmhs),
+	)
+	x, y := sqlx.Build()
+
+	qresults, err := dbConn.Query(x, y...)
+	if err != nil {
+		localtools.LogThisError(ctx, err.Error())
+		return
+	}
+
+	defer qresults.Close()
+	var outputstring string = ""
+	ctx.SetStatusCode(404)
+	for qresults.Next() {
+		var pesertaid, pesertanama, sesipembicara, sesitopik, sesimeetingid, sesipassword, waktulogin string
+		qresults.Scan(
+			&pesertaid,
+			&pesertanama,
+			&sesipembicara,
+			&sesitopik,
+			&sesimeetingid,
+			&sesipassword,
+			&waktulogin,
+		)
+		outputstring += "NIM : " + pesertaid + "<br />"
+		outputstring += "Nama : " + pesertanama + "<br />"
+		outputstring += "Sesi : " + sesipembicara + "<br />"
+		outputstring += "Topik : " + sesitopik + "<br />"
+		outputstring += "MeetingId : " + sesimeetingid + "<br />"
+		outputstring += "Password : " + sesipassword + "<br />"
+		outputstring += "Join Terakhir: " + waktulogin + "<br />" + "<br />"
+
+		ctx.SetStatusCode(200)
+	}
+
+	ctx.WriteString(outputstring)
 }
