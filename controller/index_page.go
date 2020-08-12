@@ -94,7 +94,7 @@ func IndexTemplate() string {
 								<div class="form-group" style="margin-top: 30px;">
 									<label for="username" class="text-info">ID / NIM</label><br>
 									<input type="text" name="username" id="username" class="form-control">
-									<p class="text-muted" style="font-size: 10px;">Perhatian, anda hanya boleh login sebanyak satu kali. Double login akan diblokir. Masukan ID yang anda terima untuk mengikuti seminar ini</p>
+									<p class="text-muted" style="font-size: 10px;">Perhatian, anda hanya boleh login sebanyak satu kali. Double login akan diblokir. Masukan ID yang anda terima untuk mengikuti seminar ini. Jika mengalami kendala hubungi kami panitia kulindus di nomor WA: 0858-2927-0824</p>
 								</div>
 								<div class="form-group">
 									<button type="button" class="btn btn-block btn-info btn-md" id="login_btn">Masuk Seminar</button>

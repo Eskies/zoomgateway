@@ -216,7 +216,7 @@ func SeminarTemplate() string {
 						<li class="list-group-item">Jika saat terkoneksi mengalami kendala berupa "Tanda tangan sudah kaduluarsa / Signature Expired" pastikan jam di HP / Komputer anda telah tersinkronisasi dengan waktu GMT/UTC.</li>
 						<li class="list-group-item">Jika suara tidak terdengar, pastikan anda mengijinkan (allow) browser untuk menggunakan audio (speaker / microphone)</li>
 						<li class="list-group-item">Sangat disarankan untuk menggunakan komputer via browser (Chrome / Mozzila) untuk mengikuti seminar ini.</li>
-						<li class="list-group-item">Namun jika anda masih terkendala, hubungi kami panitia kulindus di nomor WA: 0877-6159-8092 (Pak Bhaskara)</li>
+						<li class="list-group-item">Namun jika anda masih terkendala, hubungi kami panitia kulindus di nomor WA: 0858-2927-0824 atau klik -> <a href="https://api.whatsapp.com/send?phone=6285829270824&text=Salam%20STIKOM%20Bali%2C%20saya%20peserta%20Kuliah%20Industri%20NIM%20$nim.%20Mohon%20bantuan%20saya%20terkendala%20di%20join%20Kulindus%20di%20https%3A%2F%2Fmeet.kulindus.stikom-bali.ac.id%20" class="btn btn-success" target="_blank">Hubungi Panitia</a></li>
 					</ul>
 				</div>
 			</div>
