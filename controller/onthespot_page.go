@@ -318,7 +318,7 @@ func CariMhs(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesettings map[string]i
 	nimmhs := string(ctx.FormValue("nimmhs"))
 
 	sqlx := sqlbuilder.NewSelectBuilder()
-	sqlx.Select("peserta.id", "peserta.nama", "sesi.pembicara", "sesi.topik", "sesi.meetingid", "sesi.password", "pesertapersesi.waktulogin")
+	sqlx.Select("peserta.id", "peserta.nama", "sesi.pembicara", "sesi.topik", "sesi.meetingid", "sesi.password", "pesertapersesi.waktulogin", `DATE_FORMAT(sesi.tanggal, "%d-%b-%Y")`, "sesi.waktumulai", "sesi.waktuselesai")
 	sqlx.From("pesertapersesi")
 	sqlx.Join("peserta", "peserta.id = pesertapersesi.peserta_id")
 	sqlx.Join("sesi", "sesi.id = pesertapersesi.sesi_id")
@@ -337,7 +337,7 @@ func CariMhs(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesettings map[string]i
 	var outputstring string = ""
 	ctx.SetStatusCode(404)
 	for qresults.Next() {
-		var pesertaid, pesertanama, sesipembicara, sesitopik, sesimeetingid, sesipassword, waktulogin string
+		var pesertaid, pesertanama, sesipembicara, sesitopik, sesimeetingid, sesipassword, waktulogin, tanggal, jammulai, jamselesai string
 		qresults.Scan(
 			&pesertaid,
 			&pesertanama,
@@ -346,11 +346,15 @@ func CariMhs(dbConn *sql.DB, ctx *fasthttp.RequestCtx, pagesettings map[string]i
 			&sesimeetingid,
 			&sesipassword,
 			&waktulogin,
+			&tanggal,
+			&jammulai,
+			&jamselesai,
 		)
 		outputstring += "NIM : " + pesertaid + "<br />"
 		outputstring += "Nama : " + pesertanama + "<br />"
 		outputstring += "Sesi : " + sesipembicara + "<br />"
 		outputstring += "Topik : " + sesitopik + "<br />"
+		outputstring += "Waktu : " + tanggal + " (" + jammulai + " - " + jamselesai + ")" + "<br />"
 		outputstring += "MeetingId : " + sesimeetingid + "<br />"
 		outputstring += "Password : " + sesipassword + "<br />"
 		outputstring += "Join Terakhir: " + waktulogin + "<br />" + "<br />"
